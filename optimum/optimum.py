@@ -11,7 +11,7 @@ def _sanitize(
 ):
 
     if not isinstance(inlist, list):
-        raise Exception("input parameter is not of type 'list'")
+        raise Exception("Input parameter is not of type 'list'")
 
     if (
         not isinstance(batch_size, int)
@@ -51,8 +51,10 @@ def optimum(
     cur_page = []
     for instr in inlist:
         if not isinstance(instr, str):
-            raise ValueError("unsupported type of list element")
+            raise ValueError("Unsupported type of list element")
         instr_size = len(instr.encode('utf-8'))
+        if instr_size > page_size:
+            raise ValueError("Batch element is too big for page size limit")
         if cur_batch_size + instr_size < batch_size:
             cur_batch_size += instr_size
             if cur_page_size + instr_size < page_size:

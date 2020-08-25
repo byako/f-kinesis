@@ -7,9 +7,15 @@ import sys
 import optimum
 
 
-DATA = ["a", "b", "cc", "ddd", "eeeee", "ffffffff"]
+DATA = ["a", "b", "cc", "ddd", "eeeee", "ffffffff", "ggggggggggggg"]
 
-optimised_data = optimum.optimum(DATA, 10)
+optimised_data = None
+
+try:
+    optimised_data = optimum.optimum(DATA, 13, 32)
+except ValueError as err:
+    print("Oh no! " + str(err))
+
 if not optimised_data:
     print("Not OKAY")
     sys.exit(1)
