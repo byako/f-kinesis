@@ -9,10 +9,10 @@ import optimum
 
 DATA = ["a", "b", "cc", "ddd", "eeeee", "ffffffff", "ggggggggggggg"]
 
-optimised_data = None
+optimised_data = None  # pylint: disable=invalid-name
 
 try:
-    optimised_data = optimum.optimum(DATA, 13, 32)
+    optimised_data = optimum.optimum(DATA, 13, 64)
 except ValueError as err:
     print("Oh no! " + str(err))
 
