@@ -10,13 +10,13 @@ API_MAX_BATCH_SIZE_RECORDS = 500
 def _sanitize(inlist: list, record_size: int, batch_size: int):
 
     if not isinstance(inlist, list):
-        raise Exception("Input parameter is not of type 'list'")
+        raise TypeError("Input parameter is not of type 'list'")
 
     if (
         not isinstance(batch_size, int)
         or 0 > batch_size > API_MAX_BATCH_SIZE_BYTES
     ):
-        raise Exception(
+        raise TypeError(
             "'batch_size' argument has to be int and in range [0, %d]"
             % API_MAX_BATCH_SIZE_BYTES,
         )
@@ -50,7 +50,7 @@ def optimum(
     cur_record = []
     for instr in inlist:
         if not isinstance(instr, str):
-            raise ValueError("Unsupported type of list element")
+            raise TypeError("Unsupported type of batch element")
         instr_size = len(instr.encode("utf-8"))
         if instr_size > record_size:
             raise ValueError("Batch element is too big for record size limit")
