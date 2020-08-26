@@ -40,8 +40,6 @@ def optimum(
     """
     Paginate input list of strings using size limit for record and batch
     """
-    print("Batch size: %s, record size: %s" % (batch_size, record_size))
-    print("Batch: %s" % " ,".join(inlist))
     _sanitize(inlist, record_size, batch_size)
 
     cur_batch_size = 0
@@ -72,3 +70,8 @@ def optimum(
     cur_batch.append(cur_record)
 
     return cur_batch
+
+
+def main():
+    """Entry point for the application script"""
+    print("use the function directly")

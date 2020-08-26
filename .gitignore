@@ -1,4 +1,7 @@
-__pycache__/
+.coverage
 *.pyc
-.tox/
 *.swp
+f_kinesis.egg-info/
+htmlcov/
+__pycache__/
+.tox/

@@ -4,7 +4,7 @@ optimal length
 """
 import sys
 
-import optimum
+import f_kinesis
 
 
 DATA = ["a", "b", "cc", "ddd", "eeeee", "ffffffff", "ggggggggggggg"]
@@ -12,7 +12,7 @@ DATA = ["a", "b", "cc", "ddd", "eeeee", "ffffffff", "ggggggggggggg"]
 optimised_data = None  # pylint: disable=invalid-name
 
 try:
-    optimised_data = optimum.optimum(DATA, 13, 64)
+    optimised_data = f_kinesis.optimum(DATA, 13, 64)
 except ValueError as err:
     print("Oh no! " + str(err))
 

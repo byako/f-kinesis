@@ -6,5 +6,4 @@ setup(name='f_kinesis',
       author='Alexey Fomenko',
       author_email='alexey.fomenko@gmail.com',
       url='https://byako.dev',
-      py_modules=['optimum'],
      )
