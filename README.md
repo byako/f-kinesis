@@ -14,6 +14,10 @@ The are assumed to be strings of variable length and they have to pass intact th
 
 The library can be used in an application which continuously reads large numbers of records from a data source and writes them to an AWS Kinesis Data stream. The library could be used to create optimum batches for sending data to the Kinesis stream.
 
+# Disclaimer
+
+Size limits are assumed to only relate to strings length, not including JSON sctructure overhead for stringified payload delivery, which inevitably is bigger. 
+
 
 # Running tests
 
