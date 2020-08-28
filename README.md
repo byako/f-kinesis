@@ -19,15 +19,59 @@ The library can be used in an application which continuously reads large numbers
 Size limits are assumed to only relate to strings length, not including JSON sctructure overhead for stringified payload delivery, which inevitably is bigger. 
 
 
-# Running tests
+# Example usage
+
+## Install f_kinesis
+
+### From pypi
 
 ```
-tox -e test
+python3 -m pip install --index-url https://test.pypi.org/simple/ f_kinesis
 ```
 
+### From sources
 
-# Running code analysis
+```
+python3 -m pip install ./
+```
+
+## Use f_kinesis
+
+### Command line
+```
+python3
+>>> import f_kinesis
+>>> result = f_kinesis.optimum(["a", "b", "cc", "ddd", "eeeee", "ffffffff", "ggggggggggggg"], 13, 64)
+>>> result
+[['a', 'b', 'cc', 'ddd', 'eeeee'], ['ffffffff'], ['ggggggggggggg']]
+
+```
+
+### Full example
+
+See [example](example/)
+
+# About sources
+
+Tox is used for automation of virtual-environments.
+
+## Install tox
+
+```
+# python3 -m pip install tox tox-venv
+```
+
+# Supported tasks:
+
+- test: run tests in venv
+- lint: run linters in venv to do static code analysis
+- format: run formatter in venv to autoformat the code
+- example: run [example](example/) application that makes use of this module
+- example-real: run same example but install latest f_kinesis release from test.pipy.org
+
+## Example task run:
 
 ```
 tox -e lint
+tox -e example
 ```
