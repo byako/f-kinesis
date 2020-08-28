@@ -2,12 +2,16 @@
 Paginate input list of strings using size limit for record and batch
 """
 
+# presumed API limits imposed by the data service
 API_MAX_RECORD_SIZE_BYTES = 1048576
 API_MAX_BATCH_SIZE_BYTES = 5242880
 API_MAX_BATCH_SIZE_RECORDS = 500
 
 
 def _sanitize(inlist: list, max_record_size: int, max_batch_size: int):
+    """
+    Validate input data
+    """
 
     if not isinstance(inlist, list):
         raise TypeError("Input parameter is not of type 'list'")
@@ -51,6 +55,7 @@ def optimum(
             raise TypeError("Unsupported type of batch element")
 
         instr_size = len(instr.encode("utf-8"))  # ensure char-size
+
         # fail if single string is more than a blank record can take
         if instr_size > max_record_size:
             raise ValueError("Batch element is too big for record size limit")
