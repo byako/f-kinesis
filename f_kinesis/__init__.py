@@ -37,7 +37,9 @@ def _sanitize(inlist: list, max_record_size: int, max_batch_size: int):
 
 
 def optimum(
-    inlist: list, max_record_size: int = 1048576, max_batch_size: int = 5242880
+    inlist: list,
+    max_record_size: int = API_MAX_RECORD_SIZE_BYTES,
+    max_batch_size: int = API_MAX_BATCH_SIZE_BYTES,
 ) -> list:
     """
     Paginate input list of strings using size limit for record and batch
