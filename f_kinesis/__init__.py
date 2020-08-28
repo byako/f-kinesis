@@ -79,8 +79,3 @@ def optimum(
     cur_batch.append(cur_record)
 
     return cur_batch
-
-
-def main():
-    """In case anyone will try to call module directly"""
-    print("this library is not callable, invoke 'optimum' function directly")
