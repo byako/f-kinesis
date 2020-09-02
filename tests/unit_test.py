@@ -23,7 +23,7 @@ def test_fail_str_not_str(batch_inner):
     TypeError is raised if any batch element is not str
     """
     batch = [batch_inner]
-    with pytest.raises(TypeError, match="Unsupported type of batch element"):
+    with pytest.raises(TypeError, match="Unsupported batch record type"):
         f_kinesis.optimum(batch)
 
 
@@ -54,7 +54,7 @@ def test_fail_wrong_record_size_param(max_record_size):
 )
 def test_fail_wrong_batch_size_param(max_batch_size):
     """
-    ValueError is raised for unsupported batch size parameter value
+    ValueError is raised for unsupported batch records number parameter value
     """
     batch = ["foo"]
     with pytest.raises(
@@ -68,6 +68,29 @@ def test_fail_wrong_batch_size_param(max_batch_size):
             batch,
             f_kinesis.API_MAX_RECORD_SIZE_BYTES,
             max_batch_size,
+        )
+
+
+@pytest.mark.parametrize(
+    "max_batch_records", [-10, 0, f_kinesis.API_MAX_BATCH_SIZE_RECORDS + 1]
+)
+def test_fail_wrong_batch_records_param(max_batch_records):
+    """
+    ValueError is raised for unsupported batch records limit parameter value
+    """
+    batch = ["foo"]
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "'max_batch_records' argument has to be int and in range [0, %s]"
+            % f_kinesis.API_MAX_BATCH_SIZE_RECORDS
+        ),
+    ):
+        f_kinesis.optimum(
+            batch,
+            f_kinesis.API_MAX_RECORD_SIZE_BYTES,
+            f_kinesis.API_MAX_BATCH_SIZE_BYTES,
+            max_batch_records,
         )
 
 
@@ -87,17 +110,6 @@ def test_fail_record_size_param_value_exceeds_batch_size_param_value():
         )
 
 
-def test_fail_if_any_string_is_bigger_than_record_size():
-    """
-    ValueError is raised if any string in batch is bigger than max_record_size
-    """
-    with pytest.raises(
-        ValueError,
-        match=re.escape("Batch element is too big for record size limit"),
-    ):
-        f_kinesis.optimum(["12345678901"], 10)
-
-
 def test_record_size_limit_reached_ok():
     """
     ValueError is not raised if any string is same size as record size limit
@@ -108,30 +120,31 @@ def test_record_size_limit_reached_ok():
     print(result)
     assert len(result) == 1
     assert len(result[0]) == 1
-    assert len(result[0][0]) == len(batch[0])
+    assert len(result[0][0]) == f_kinesis.API_MAX_RECORD_SIZE_BYTES
 
 
-def test_api_batch_records_number_limit_exceeded_fail():
+def test_unicode_discard_record_exceeding_size_limit_ok():
     """
-    ValueError is raised if resulting batch ends up having too many records
+    ValueError is raised if record size limit exceeded with unicode
     """
-    batch = ["a"] * (f_kinesis.API_MAX_BATCH_SIZE_RECORDS + 1)
+    batch = ["hmm", "\u0391\u0392\u0394\u0395\u0396"]  # 10 bytes
 
-    with pytest.raises(
-        ValueError,
-        match=re.escape("Number of records in batch exceeded"),
-    ):
-        f_kinesis.optimum(batch, 1)
+    result = f_kinesis.optimum(batch, 8, 16)
+    assert len(result) == 1
+    assert len(result[0]) == 1
+    assert result[0][0] == "hmm"
 
 
 def test_api_batch_records_number_limit_reached_ok():
     """
-    ValueError is not raised if batch records number limit reached
+    Test that no empty batch is added when records split evenly
     """
-    batch = ["a"] * f_kinesis.API_MAX_BATCH_SIZE_RECORDS
+    batch = ["a"] * f_kinesis.API_MAX_BATCH_SIZE_RECORDS * 2
 
-    result = f_kinesis.optimum(batch, 1)
-    assert len(result) == f_kinesis.API_MAX_BATCH_SIZE_RECORDS
+    result = f_kinesis.optimum(batch)
+    assert len(result) == 2
+    assert len(result[0]) == f_kinesis.API_MAX_BATCH_SIZE_RECORDS
+    assert len(result[1]) == f_kinesis.API_MAX_BATCH_SIZE_RECORDS
 
 
 def test_batch_size_limit_exceed_fail():
@@ -153,22 +166,9 @@ def test_batch_size_limit_reached_ok():
     """
     batch = ["a"] * 10
 
-    result = f_kinesis.optimum(batch, 5, 10)
+    result = f_kinesis.optimum(batch, 5, 10, 5)
     assert len(result) == 2
     assert len(result[0]) == len(result[1]) == 5
-
-
-def test_unicode_record_size_limit_exceeded_fail():
-    """
-    ValueError is raised if record size limit exceeded with unicode
-    """
-    batch = ["\u0391\u0392\u0394\u0395\u0396"]  # 10 bytes
-
-    with pytest.raises(
-        ValueError,
-        match=re.escape("Batch element is too big for record size limit"),
-    ):
-        f_kinesis.optimum(batch, 8, 16)
 
 
 def test_ok_same_order():
