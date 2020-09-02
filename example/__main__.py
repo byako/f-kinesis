@@ -10,12 +10,13 @@ import f_kinesis
 DATA = ["a", "b", "cc", "ddd", "eeeee", "ffffffff", "ggggggggggggg"]
 RECORD_SIZE_LIMIT = 13
 BATCH_SIZE_LIMIT = 64
+BATCH_SIZE_RECORDS = 5
 
 optimised_data = None  # pylint: disable=invalid-name
 
 try:
     optimised_data = f_kinesis.optimum(
-        DATA, RECORD_SIZE_LIMIT, BATCH_SIZE_LIMIT
+        DATA, RECORD_SIZE_LIMIT, BATCH_SIZE_LIMIT, BATCH_SIZE_RECORDS
     )
 except ValueError as err:
     print("Oh no! " + str(err))

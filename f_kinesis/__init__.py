@@ -1,5 +1,5 @@
 """
-Paginate input list of strings using size limit for record and batch
+Paginate input list of records using size limit for record and batch
 """
 
 # presumed API limits imposed by the data service
@@ -8,7 +8,12 @@ API_MAX_BATCH_SIZE_BYTES = 5242880
 API_MAX_BATCH_SIZE_RECORDS = 500
 
 
-def _sanitize(inlist: list, max_record_size: int, max_batch_size: int):
+def _sanitize(
+    inlist: list,
+    max_record_size: int,
+    max_batch_size: int,
+    max_batch_records: int,
+):
     """
     Validate input data
     """
@@ -35,54 +40,54 @@ def _sanitize(inlist: list, max_record_size: int, max_batch_size: int):
     if max_record_size > max_batch_size:
         raise ValueError("'max_record_size' cannot exceed 'max_batch_size'")
 
+    if not 0 < max_batch_records <= API_MAX_BATCH_SIZE_RECORDS:
+        raise ValueError(
+            "'max_batch_records' argument has to be int and in range [0, %d]"
+            % API_MAX_BATCH_SIZE_RECORDS,
+        )
+
 
 def optimum(
     inlist: list,
     max_record_size: int = API_MAX_RECORD_SIZE_BYTES,
     max_batch_size: int = API_MAX_BATCH_SIZE_BYTES,
+    max_batch_records: int = API_MAX_BATCH_SIZE_RECORDS,
 ) -> list:
     """
-    Paginate input list of strings using size limit for record and batch
+    Paginate input list of records using size limit for record and batch
     """
-    _sanitize(inlist, max_record_size, max_batch_size)
+    _sanitize(inlist, max_record_size, max_batch_size, max_batch_records)
 
-    cur_batch_size = 0
-    cur_record_size = 0
+    out_batches_size = 0
     cur_batch = []
-    cur_record = []
+    out_batches = []
 
-    for instr in inlist:
+    for in_record in inlist:
         # sanitize type in place since
-        if not isinstance(instr, str):
-            raise TypeError("Unsupported type of batch element")
+        if not isinstance(in_record, str):
+            raise TypeError("Unsupported batch record type")
 
-        instr_size = len(instr.encode("utf-8"))  # ensure char-size
+        in_record_size = len(in_record.encode("utf-8"))  # ensure char-size
 
-        # fail if single string is more than a blank record can take
-        if instr_size > max_record_size:
-            raise ValueError("Batch element is too big for record size limit")
+        if in_record_size > max_record_size:
+            print("Discarding record that exceeds record size limit")
+            continue
 
-        # test if we're still under API batch size limit
-        if cur_batch_size + instr_size <= max_batch_size:
-            cur_batch_size += instr_size
+        # test if we're still under batch size limit
+        if out_batches_size + in_record_size <= max_batch_size:
+            out_batches_size += in_record_size
+            cur_batch.append(in_record)
 
-            # test if current string fits into record size limit
-            if cur_record_size + instr_size <= max_record_size:
-                cur_record.append(instr)
-                cur_record_size += instr_size
-            else:  # record limit would be exceeded, get new record
-                cur_batch.append(cur_record)
-                cur_record = [instr]
-                cur_record_size = instr_size
-                # ensure API records number in batch will not be exceeded
-                if len(cur_batch) >= API_MAX_BATCH_SIZE_RECORDS:
-                    raise ValueError("Number of records in batch exceeded")
+            # test if current batch reached records limit
+            if len(cur_batch) == max_batch_records:
+                out_batches.append(cur_batch)
+                cur_batch = []
         else:
             raise ValueError(
                 "Total batch size exceeds maximum batch size limit"
             )
 
-    # last batch already counted with inclusive comparison condition
-    cur_batch.append(cur_record)
+    if cur_batch:
+        out_batches.append(cur_batch)
 
-    return cur_batch
+    return out_batches
